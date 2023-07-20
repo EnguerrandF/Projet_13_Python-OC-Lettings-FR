@@ -32,7 +32,7 @@ jobs:
           name: Push DockerHub
           command: |
               echo $TOKEN_DOCKER | docker login --username $USER_NAME_DOCKER --password-stdin
-              docker tag $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 $CIRCLE_PROJECT_REPONAME:latest
+              docker tag $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:latest
               docker push $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1
               docker push $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:latest
 
