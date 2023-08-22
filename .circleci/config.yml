@@ -46,6 +46,7 @@ jobs:
     steps:
       - checkout
       - aws-ecr/build_and_push_image:
+          account_id: "615942929624"
           auth:
               - aws-cli/setup:
                   aws-access-key-id: AWS_ACCESS_KEY_ID
