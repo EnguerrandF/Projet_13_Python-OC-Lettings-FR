@@ -2,6 +2,10 @@ version: 2.1
 
 orbs:
   python: circleci/python@1.5.0
+  aws-cli: circleci/aws-cli@3.1
+  aws-ecs: circleci/aws-ecs@4.0
+  aws-ecr: circleci/aws-ecr@9.0.0
+  #aws-code-deploy: circleci/aws-code-deploy@3.0
 
 jobs:
   build-and-test:
@@ -36,6 +40,28 @@ jobs:
               docker push $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1
               docker push $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:latest
 
+  deploy_application_aws:
+    docker:
+      - image: circleci/python:3.8
+    steps:
+      - checkout
+      - aws-ecr/build_and_push_image:
+          auth:
+              - aws-cli/setup:
+                  profile_name: default.
+                  aws-access-key-id: AWS_ACCESS_KEY_ID
+                  aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          dockerfile: dockerfile
+          platform: linux/amd64
+          push_image: false
+          region: eu-west-3
+          repo: projet_13_python-oc-lettings-fr
+          tag: $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:latest
+      - aws-ecr/push_image:
+          region: eu-west-3
+          repo: projet_13_python-oc-lettings-fr
+          tag: $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:latest
+
 workflows:
   sample:
     jobs:
@@ -43,3 +69,6 @@ workflows:
       - build-docker:
           requires:
             - build-and-test
+      - deploy_application_aws:
+          requires:
+                - build-docker
