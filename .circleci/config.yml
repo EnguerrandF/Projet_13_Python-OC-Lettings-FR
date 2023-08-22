@@ -55,7 +55,6 @@ jobs:
           dockerfile: dockerfile
           platform: linux/amd64
           region: us-east-1
-          public_registry: true
           repo: projet_13_python-oc-lettings-fr
           tag: latest
 
