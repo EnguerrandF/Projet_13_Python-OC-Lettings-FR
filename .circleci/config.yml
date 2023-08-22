@@ -56,7 +56,7 @@ jobs:
           platform: linux/amd64
           region: us-east-1
           public_registry: true
-          repo: public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr
+          repo: projet_13_python-oc-lettings-fr
           tag: latest
 
 workflows:
