@@ -50,7 +50,6 @@ jobs:
               - aws-cli/setup:
                   aws-access-key-id: AWS_ACCESS_KEY_ID
                   aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-          profile-name: 615942929624
           dockerfile: dockerfile
           platform: linux/amd64
           push_image: false
@@ -58,6 +57,7 @@ jobs:
           repo: projet_13_python-oc-lettings-fr
           tag: $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:latest
       - aws-ecr/push_image:
+          account_id: "615942929624"
           region: eu-west-3
           repo: projet_13_python-oc-lettings-fr
           tag: $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:latest
