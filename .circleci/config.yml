@@ -42,12 +42,12 @@ jobs:
 
   deploy_application_aws:
     docker:
-      - image: circleci/python:3.8
+      - image: cimg/base:stable
     steps:
       - checkout
       - aws-ecr/build_and_push_image:
           account_id: "615942929624"
-          setup_remote_docker: True
+          setup_remote_docker: true
           auth:
               - aws-cli/setup:
                   aws-access-key-id: AWS_ACCESS_KEY_ID
