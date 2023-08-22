@@ -55,7 +55,8 @@ jobs:
           dockerfile: dockerfile
           platform: linux/amd64
           region: us-east-1
-          repo: projet_13_python-oc-lettings-fr
+          public_registry: true
+          repo: public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr
           tag: latest
 
 workflows:
