@@ -50,6 +50,7 @@ jobs:
               - aws-cli/setup:
                   aws-access-key-id: AWS_ACCESS_KEY_ID
                   aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          profile-name: 615942929624
           dockerfile: dockerfile
           platform: linux/amd64
           push_image: false
