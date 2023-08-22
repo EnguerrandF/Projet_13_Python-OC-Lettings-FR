@@ -56,7 +56,7 @@ jobs:
           platform: linux/amd64
           region: eu-west-3
           repo: projet_13_python-oc-lettings-fr
-          tag: $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:latest
+          tag: latest
 
 workflows:
   sample:
