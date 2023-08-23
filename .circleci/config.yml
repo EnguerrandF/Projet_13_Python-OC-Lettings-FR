@@ -42,7 +42,7 @@ jobs:
 
   deploy_application_aws:
     docker:
-      - image: aws-cli
+      - image: cimg/base:stable
     steps:
       - checkout
       - setup_remote_docker:
@@ -60,6 +60,10 @@ jobs:
       #    region: us-east-1
       #    repo: projet_13_python-oc-lettings-fr
       #    tag: latest
+      
+      - aws-cli/setup:
+                  aws-access-key-id: AWS_ACCESS_KEY_ID
+                  aws-secret-access-key: AWS_SECRET_ACCESS_KEY
       - run:
           name: Build Docker image
           command: docker build -t public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 .
