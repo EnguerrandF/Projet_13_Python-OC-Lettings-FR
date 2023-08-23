@@ -68,10 +68,13 @@ jobs:
           name: Build Docker image
           command: docker build -t public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 .
       - run:
-          name: Push AWS ECR
+          name: Connexion docker to AWS ECR
           command: |
               aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/k4x1n9q9
-              docker tag public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1:latest
+      - run:
+          name: Push AWS ECR
+          command: |
+              docker tag public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:latest
               docker push public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:latest
               docker push public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1
 workflows:
