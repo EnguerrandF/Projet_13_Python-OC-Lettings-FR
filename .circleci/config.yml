@@ -22,49 +22,60 @@ jobs:
           name: Run Flake8
           command: flake8
 
-  build-docker:
-    docker:
-      - image: circleci/python:3.8
-    steps:
-      - checkout
-      - setup_remote_docker:
-          version: 20.10.14
-      - run:
-          name: Build Docker image
-          command: docker build -t $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 .
-      - run:
-          name: Push DockerHub
-          command: |
-              echo $TOKEN_DOCKER | docker login --username $USER_NAME_DOCKER --password-stdin
-              docker tag $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:latest
-              docker push $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1
-              docker push $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:latest
+  # build-docker:
+  #   docker:
+  #     - image: circleci/python:3.8
+  #   steps:
+  #     - checkout
+  #     - setup_remote_docker:
+  #         version: 20.10.14
+  #     - run:
+  #         name: Build Docker image
+  #         command: docker build -t $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 .
+  #     - run:
+  #         name: Push DockerHub
+  #         command: |
+  #             echo $TOKEN_DOCKER | docker login --username $USER_NAME_DOCKER --password-stdin
+  #             docker tag $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:latest
+  #             docker push $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1
+  #             docker push $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:latest
 
   deploy_application_aws:
     docker:
       - image: cimg/base:stable
     steps:
       - checkout
-      - aws-ecr/build_and_push_image:
-          account_id: "615942929624"
-          setup_remote_docker: true
-          auth:
-              - aws-cli/setup:
-                  aws-access-key-id: AWS_ACCESS_KEY_ID
-                  aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-          dockerfile: dockerfile
-          platform: linux/amd64
-          region: us-east-1
-          repo: projet_13_python-oc-lettings-fr
-          tag: latest
-
+      #- aws-ecr/build_and_push_image:
+      #    account_id: "615942929624"
+      #    setup_remote_docker: true
+      #    auth:
+      #        - aws-cli/setup:
+      #            aws-access-key-id: AWS_ACCESS_KEY_ID
+      #            aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+      #    dockerfile: dockerfile
+      #    push_image: true
+      #    platform: linux/amd64
+      #    region: us-east-1
+      #    repo: projet_13_python-oc-lettings-fr
+      #    tag: latest
+      - run:
+          name: Build Docker image
+          command: docker build -t public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 .
+      - run:
+          name: Push AWS ECR
+          command: |
+              aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/k4x1n9q9
+              docker tag public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1:latest
+              docker push public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:latest
+              docker push public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1
 workflows:
   sample:
     jobs:
       - build-and-test
-      - build-docker:
-          requires:
-            - build-and-test
-      - deploy_application_aws:
-          requires:
-                - build-docker
+      - deploy_application_aws
+      #- build-docker:
+      #    requires:
+      #      - build-and-test
+      #- deploy_application_aws:
+      #    requires:
+      #          - build-docker
