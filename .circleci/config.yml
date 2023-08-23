@@ -42,7 +42,7 @@ jobs:
 
   deploy_application_aws:
     docker:
-      - image: cimg/base:stable
+      - image: aws-cli
     steps:
       - checkout
       - setup_remote_docker:
