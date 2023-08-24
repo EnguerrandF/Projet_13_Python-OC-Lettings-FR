@@ -72,12 +72,12 @@ jobs:
       - aws-cli/setup:
           aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-      - aws-ecs/run_task:
-          awsvpc: false
-          subnet_ids: vpc-04b3fac2ac183395f
+      #- aws-ecs/update_task_definition_from_json:
+      #    task_definition_json: .circleci\Tache_Projet_13.json
+      - aws-ecs/update_service:
           cluster: Projet_13
-          launch_type: FARGATE
-          task_definition: Tache_Projet_13
+          container_image_name_updates: container=public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr,tag=latest
+          family: Tache_Projet_13
       
 
 workflows:
