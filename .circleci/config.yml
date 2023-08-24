@@ -8,7 +8,7 @@ orbs:
   #aws-code-deploy: circleci/aws-code-deploy@3.0
 
 jobs:
-  build-and-test:
+  test-app:
     executor: python/default
     steps:
       - checkout
@@ -40,35 +40,21 @@ jobs:
   #             docker push $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1
   #             docker push $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:latest
 
-  deploy_application_aws:
+  build-and-push-aws-ecr:
     docker:
       - image: cimg/base:stable
     steps:
       - checkout
       - setup_remote_docker:
           version: 20.10.14
-      #- aws-ecr/build_and_push_image:
-      #    account_id: "615942929624"
-      #    setup_remote_docker: true
-      #    auth:
-      #        - aws-cli/setup:
-      #            aws-access-key-id: AWS_ACCESS_KEY_ID
-      #            aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-      #    dockerfile: dockerfile
-      #    push_image: true
-      #    platform: linux/amd64
-      #    region: us-east-1
-      #    repo: projet_13_python-oc-lettings-fr
-      #    tag: latest
-      
       - aws-cli/setup:
-                  aws-access-key-id: AWS_ACCESS_KEY_ID
-                  aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
       - run:
           name: Build Docker image
           command: docker build -t public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 .
       - run:
-          name: Connexion docker to AWS ECR
+          name: Connection docker to AWS ECR
           command: |
               aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/k4x1n9q9
       - run:
@@ -77,14 +63,30 @@ jobs:
               docker tag public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:latest
               docker push public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:latest
               docker push public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1
+
+  deploy_application_aws:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+      - aws-ecs/run_task:
+          awsvpc: false
+          subnet_ids: vpc-04b3fac2ac183395f
+          cluster: Projet_13
+          launch_type: FARGATE
+          task_definition: Tache_Projet_13
+      
+
 workflows:
   sample:
     jobs:
-      - build-and-test
-      - deploy_application_aws
-      #- build-docker:
-      #    requires:
-      #      - build-and-test
-      #- deploy_application_aws:
-      #    requires:
-      #          - build-docker
+      - test-app
+      - build-and-push-aws-ecr:
+          requires:
+            - test-app
+      - deploy_application_aws:
+            requires:
+              - build-and-push-aws-ecr
