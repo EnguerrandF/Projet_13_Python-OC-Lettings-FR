@@ -72,6 +72,7 @@ jobs:
       - aws-cli/setup:
           aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          aws-region: eu_west_3
       #- aws-ecs/update_task_definition_from_json:
       #    task_definition_json: .circleci\Tache_Projet_13.json
       - aws-ecs/update_service:
