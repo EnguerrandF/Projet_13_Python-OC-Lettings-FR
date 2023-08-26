@@ -55,8 +55,7 @@ jobs:
           command: docker build -t $REGISTRY_AWS:$CIRCLE_SHA1 .
       - run:
           name: Connection docker to AWS ECR
-          command: |
-              $AWS_CMD_LOGIN_REGISTRY
+          command: $AWS_CMD_LOGIN_REGISTRY
       - run:
           name: Push AWS ECR
           command: |
