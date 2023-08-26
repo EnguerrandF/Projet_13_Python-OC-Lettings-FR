@@ -52,17 +52,17 @@ jobs:
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
       - run:
           name: Build Docker image
-          command: docker build -t public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 .
+          command: docker build -t $REGISTRY_AWS:$CIRCLE_SHA1 .
       - run:
           name: Connection docker to AWS ECR
           command: |
-              aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/k4x1n9q9
+              $AWS_CMD_LOGIN_REGISTRY
       - run:
           name: Push AWS ECR
           command: |
-              docker tag public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:latest
-              docker push public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:latest
-              docker push public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1
+              docker tag $REGISTRY_AWS:$CIRCLE_SHA1 $REGISTRY_AWS:latest
+              docker push $REGISTRY_AWS:latest
+              docker push $REGISTRY_AWS:$CIRCLE_SHA1
 
   deploy_application_aws:
     docker:
@@ -72,13 +72,13 @@ jobs:
       - aws-cli/setup:
           aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-          aws-region: eu_west_3
-      #- aws-ecs/update_task_definition_from_json:
-      #    task_definition_json: .circleci\Tache_Projet_13.json
-      - aws-ecs/update_service:
-          cluster: Projet_13
-          container_image_name_updates: container=public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr,tag=latest
-          family: Tache_Projet_13
+      - run:
+         name: Update task
+         command: aws ecs register-task-definition --family $AWS_FAMILY_TASK --network-mode awsvpc --requires-compatibilities FARGATE --cpu 512 --memory 1024 --container-definitions '[{"name":"projet_13_python-oc-lettings-fr", "image":"$REGISTRY_AWS","cpu":512,"memory":1024}]'
+      - run:
+         name: Update service
+         command: aws ecs update-service --cluster $AWS_CLUSTER --service Service_projet_13 --task-definition $AWS_FAMILY_TASK
+      
       
 
 workflows:
