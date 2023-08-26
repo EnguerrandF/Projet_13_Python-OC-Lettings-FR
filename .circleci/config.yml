@@ -55,7 +55,7 @@ jobs:
           command: docker build -t $REGISTRY_AWS:$CIRCLE_SHA1 .
       - run:
           name: Connection docker to AWS ECR
-          command: aws ecr-public $AWS_CMD_LOGIN_REGISTRY
+          command: aws ecr-public get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_CMD_LOGIN_REGISTRY
       - run:
           name: Push AWS ECR
           command: |
@@ -76,7 +76,7 @@ jobs:
          command: aws ecs register-task-definition --family $AWS_FAMILY_TASK --network-mode awsvpc --requires-compatibilities FARGATE --cpu 512 --memory 1024 --container-definitions '[{"name":"projet_13_python-oc-lettings-fr", "image":"$REGISTRY_AWS","cpu":512,"memory":1024}]'
       - run:
          name: Update service
-         command: aws ecs update-service --cluster $AWS_CLUSTER --service Service_projet_13 --task-definition $AWS_FAMILY_TASK
+         command: aws ecs update-service --cluster $AWS_CLUSTER --service $AWS_SERVICE --task-definition $AWS_FAMILY_TASK
       
       
 
