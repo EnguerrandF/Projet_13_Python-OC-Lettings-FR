@@ -50,6 +50,7 @@ jobs:
       - aws-cli/setup:
           aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          aws-region: AWS_REGION
       - run:
           name: Build Docker image
           command: docker build -t $REGISTRY_AWS:$CIRCLE_SHA1 .
@@ -75,7 +76,7 @@ jobs:
       - run:
          name: Update task 
         #  aws ecs register-task-definition --family Tache_projet_13 --network-mode awsvpc --requires-compatibilities FARGATE --cpu 512 --memory 1024 --container-definitions '[{"name":"projet_13_python-oc-lettings-fr","image":"public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:latest","cpu":512,"memory":1024}]'
-         command: aws ecs register-task-definition --region $AWS_REGION --family $AWS_FAMILY_TASK --network-mode awsvpc --requires-compatibilities FARGATE --cpu 512 --memory 1024 --container-definitions '[{"name":"projet_13_python-oc-lettings-fr","image":"'$REGISTRY_AWS:$CIRCLE_SHA1'","cpu":512,"memory":1024}]'
+         command: aws ecs register-task-definition --debug --region $AWS_REGION --family $AWS_FAMILY_TASK --network-mode awsvpc --requires-compatibilities FARGATE --cpu 512 --memory 1024 --container-definitions '[{"name":"projet_13_python-oc-lettings-fr","image":"'$REGISTRY_AWS:$CIRCLE_SHA1'","cpu":512,"memory":1024}]'
       - run:
          name: Update service
          command: aws ecs update-service --region $AWS_REGION --cluster $AWS_CLUSTER --service $AWS_SERVICE --task-definition $AWS_FAMILY_TASK
