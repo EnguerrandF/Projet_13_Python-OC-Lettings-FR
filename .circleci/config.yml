@@ -2,13 +2,15 @@ version: 2.1
 
 orbs:
   python: circleci/python@1.5.0
+  aws-cli: circleci/aws-cli@3.1
 
 jobs:
-  build-and-test:
+  test-app:
     executor: python/default
     steps:
       - checkout
       - python/install-packages:
+          pip-dependency-file: requirements.txt
           pkg-manager: pip
       - run:
           name: Run tests pytest
@@ -17,33 +19,80 @@ jobs:
           name: Run Flake8
           command: flake8
 
-  build-docker:
+  # build-docker:
+  #   docker:
+  #     - image: circleci/python:3.8
+  #   steps:
+  #     - checkout
+  #     - setup_remote_docker:
+  #         version: 20.10.14
+  #     - run:
+  #         name: Build Docker image
+  #         command: docker build -t $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 .
+  #     - run:
+  #         name: Push DockerHub
+  #         command: |
+  #             echo $TOKEN_DOCKER | docker login --username $USER_NAME_DOCKER --password-stdin
+  #             docker tag $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1 $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:latest
+  #             docker push $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:$CIRCLE_SHA1
+  #             docker push $USER_NAME_DOCKER/projet_13_python-oc-lettings-fr:latest
+
+  build-and-push-aws-ecr:
     docker:
-      - image: circleci/python:3.8
+      - image: cimg/base:stable
     steps:
       - checkout
       - setup_remote_docker:
           version: 20.10.14
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
       - run:
           name: Build Docker image
-          command: docker build -t $CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1 .
+          command: docker build -t $REGISTRY_AWS:$CIRCLE_SHA1 .
       - run:
-          name: Push DockerHub
-          command:
-              echo $TOKEN_DOCKER | docker login -u $USER_NAME_DOCKER --password-stdin
-              docker tag $CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1 $CIRCLE_PROJECT_REPONAME:latest
-              docker push $CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1
-              docker push $CIRCLE_PROJECT_REPONAME:latest
+          name: Connection docker to AWS ECR
+          command: aws ecr-public get-login-password --region $AWS_REGION_REPO | docker login --username AWS --password-stdin $AWS_CMD_LOGIN_REGISTRY
+      - run:
+          name: Push AWS ECR
+          command: |
+              docker tag $REGISTRY_AWS:$CIRCLE_SHA1 $REGISTRY_AWS:latest
+              docker push $REGISTRY_AWS:latest
+              docker push $REGISTRY_AWS:$CIRCLE_SHA1
+
+  deploy_application_aws:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          aws-region: AWS_REGION
+      - run:
+         name: Update task
+         command: aws ecs register-task-definition --debug --region $AWS_REGION --family $AWS_FAMILY_TASK --network-mode awsvpc --requires-compatibilities FARGATE --cpu 512 --memory 1024 --container-definitions '[{"name":"projet_13_python-oc-lettings-fr","image":"'$REGISTRY_AWS:$CIRCLE_SHA1'","cpu":512,"memory":1024}]'
+      - run:
+         name: Update service
+         command: aws ecs update-service --region $AWS_REGION --cluster $AWS_CLUSTER --service $AWS_SERVICE --task-definition $AWS_FAMILY_TASK
+      
+      
 
 workflows:
   sample:
     jobs:
-      - build-and-test
-      
-      build-docker:
-        requires:
-        - build-and-test
-      filters:
-        branches:
-          only:
-            - master
+      - test-app
+      - build-and-push-aws-ecr:
+          requires:
+            - test-app
+          filters:
+            branches:
+              only:
+                - master
+      - deploy_application_aws:
+          requires:
+            - build-and-push-aws-ecr
+          filters:
+            branches:
+              only:
+                - master
