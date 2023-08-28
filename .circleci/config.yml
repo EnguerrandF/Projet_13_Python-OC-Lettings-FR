@@ -3,9 +3,6 @@ version: 2.1
 orbs:
   python: circleci/python@1.5.0
   aws-cli: circleci/aws-cli@3.1
-  aws-ecs: circleci/aws-ecs@4.0
-  aws-ecr: circleci/aws-ecr@9.0.0
-  #aws-code-deploy: circleci/aws-code-deploy@3.0
 
 jobs:
   test-app:
@@ -73,8 +70,7 @@ jobs:
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
           aws-region: AWS_REGION
       - run:
-         name: Update task 
-        #  aws ecs register-task-definition --family Tache_projet_13 --network-mode awsvpc --requires-compatibilities FARGATE --cpu 512 --memory 1024 --container-definitions '[{"name":"projet_13_python-oc-lettings-fr","image":"public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:latest","cpu":512,"memory":1024}]'
+         name: Update task
          command: aws ecs register-task-definition --debug --region $AWS_REGION --family $AWS_FAMILY_TASK --network-mode awsvpc --requires-compatibilities FARGATE --cpu 512 --memory 1024 --container-definitions '[{"name":"projet_13_python-oc-lettings-fr","image":"'$REGISTRY_AWS:$CIRCLE_SHA1'","cpu":512,"memory":1024}]'
       - run:
          name: Update service
@@ -89,6 +85,14 @@ workflows:
       - build-and-push-aws-ecr:
           requires:
             - test-app
+          filters:
+            branches:
+              only:
+                - master
       - deploy_application_aws:
-            requires:
-              - build-and-push-aws-ecr
+          requires:
+            - build-and-push-aws-ecr
+          filters:
+            branches:
+              only:
+                - master
