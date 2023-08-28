@@ -74,7 +74,7 @@ jobs:
       - run:
          name: Update task 
         #  public.ecr.aws/k4x1n9q9/projet_13_python-oc-lettings-fr:latest
-         command: aws ecs register-task-definition --family $AWS_FAMILY_TASK --network-mode awsvpc --requires-compatibilities FARGATE --cpu 512 --memory 1024 --container-definitions '[{"name":"projet_13_python-oc-lettings-fr","image":"'$REGISTRY_AWS'","cpu":512,"memory":1024}]'
+         command: aws ecs register-task-definition --family $AWS_FAMILY_TASK --network-mode awsvpc --requires-compatibilities FARGATE --cpu 512 --memory 1024 --container-definitions '[{"name":"projet_13_python-oc-lettings-fr","image":"'$REGISTRY_AWS:$CIRCLE_SHA1'","cpu":512,"memory":1024}]'
       #- run:
       #   name: Update service
       #   command: aws ecs update-service --cluster $AWS_CLUSTER --service $AWS_SERVICE --task-definition $AWS_FAMILY_TASK
