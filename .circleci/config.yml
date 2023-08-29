@@ -71,11 +71,11 @@ jobs:
           aws-region: AWS_REGION
       - run:
          name: Update task
+         
          command: aws ecs register-task-definition --debug --region $AWS_REGION --family $AWS_FAMILY_TASK --network-mode awsvpc --requires-compatibilities FARGATE --cpu 512 --memory 1024 --container-definitions '[{"name":"projet_13_python-oc-lettings-fr","image":"'$REGISTRY_AWS:$CIRCLE_SHA1'","cpu":512,"memory":1024}]'
       - run:
          name: Update service
-         command: aws ecs update-service --region $AWS_REGION --cluster $AWS_CLUSTER --service $AWS_SERVICE --task-definition $AWS_FAMILY_TASK
-      
+         command: aws ecs update-service --region $AWS_REGION --cluster $AWS_CLUSTER --service $AWS_SERVICE --task-definition $AWS_FAMILY_TASK --network-configuration {"awsvpcConfiguration":{"subnets":["subnet-07d24d6b46aea4e37",],"securityGroups":["sg-01abe1ca938018477",],"assignPublicIp":"ENABLED"}}
       
 
 workflows:
