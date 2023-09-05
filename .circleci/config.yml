@@ -83,14 +83,14 @@ workflows:
       - build-and-push-aws-ecr:
           requires:
             - test-app
-          # filters:
-          #   branches:
-          #     only:
-          #       - master
+          filters:
+            branches:
+              only:
+                - master
       - deploy_application_aws:
           requires:
             - build-and-push-aws-ecr
-          #filters:
-          #  branches:
-          #    only:
-          #      - master
+          filters:
+            branches:
+              only:
+                - master
