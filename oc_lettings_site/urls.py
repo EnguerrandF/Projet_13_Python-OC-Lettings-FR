@@ -3,7 +3,7 @@ from django.urls import path, include
 
 
 def trigger_error(request):
-    division_by_zero = 1 / 0
+    return 1 / 0
 
 
 urlpatterns = [
