@@ -1,6 +1,8 @@
 FROM python:3.12.0b4-alpine3.18
 
 ENV PORT=80
+ARG SENTRY_URL=default_value
+ENV SENTRY_URL=$SENTRY_URL
 
 WORKDIR /app
 
