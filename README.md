@@ -11,7 +11,7 @@ L'objectif de ce projet est :
 *  Mettre en place un pipeline CI/CD et le déploiement du site web vers un hébergeur.(AWS de choisi).
 * Surveillance de l'application et suivi des erreurs via Sentry.
 
-## déploiement  local du le projet Python-OC-Lettings-FR
+## Déploiement  local du le projet Python-OC-Lettings-FR
 #### 1- Sélectionner la commande Git ci-dessous afin de récupérer le projet:
 ```
      git clone https://github.com/EnguerrandF/Projet_13_Python-OC-Lettings-FR.git
